@@ -40,6 +40,9 @@ def predict():
     files = request.files.getlist('files')
     results = []
 
+    # 加载模型
+    model = tf.saved_model.load('./model/saved_model')
+
     for file in files:
         if file.filename == '':
             results.append({'error': 'No selected file'})
@@ -49,19 +52,20 @@ def predict():
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
 
-            # 加载模型
-            model = tf.saved_model.load('./model/saved_model')
-
             # 读入图片
             image = read_image(filepath)
 
-            # 得到模型返回结果
-            preds = model([image])
-            probability = 100 * tf.get_static_value(preds[0])[0]
+            # # 得到模型返回结果
+            # preds = model([image])
+            # probability = 100 * tf.get_static_value(preds[0])[0]
+            # 确保使用GPU进行推理
+            with tf.device('/GPU:0'):
+                preds = model([image])
+                probability = 100 * tf.get_static_value(preds[0])[0]
 
             results.append({'probability': probability, 'filename': filename})
         else:
-            results.append({'error': 'File type not allowed'})
+            results.append({'error': '文件类型不允许'})
 
     return jsonify(results)
 
