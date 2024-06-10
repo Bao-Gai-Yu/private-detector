@@ -8,7 +8,7 @@
 <body>
     <h1>Private Detector</h1>
     <form id="upload-form" enctype="multipart/form-data">
-        <input type="file" id="file" name="file" accept="image/*">
+        <input type="file" id="file" name="file" accept="image/*" multiple>
         <button type="submit">Upload</button>
     </form>
     <div id="result"></div>
@@ -17,21 +17,26 @@
             event.preventDefault();
             const formData = new FormData();
             const fileField = document.querySelector('input[type="file"]');
-            formData.append('file', fileField.files[0]);
+            for (const file of fileField.files) {
+                formData.append('files', file);
+            }
 
             const response = await fetch('http://127.0.0.1:5000/predict', {
                 method: 'POST',
                 body: formData
             });
 
-            const result = await response.json();
+            const results = await response.json();
             const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '';
 
-            if (result.error) {
-                resultDiv.textContent = `Error: ${result.error}`;
-            } else {
-                resultDiv.textContent = `Probability: ${result.probability.toFixed(2)}% - ${result.filename}`;
-            }
+            results.forEach(result => {
+                if (result.error) {
+                    resultDiv.innerHTML += `<p>Error: ${result.error}</p>`;
+                } else {
+                    resultDiv.innerHTML += `<p>Probability: ${result.probability.toFixed(2)}% - ${result.filename}</p>`;
+                }
+            });
         }
     </script>
 </body>

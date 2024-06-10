@@ -34,29 +34,36 @@ def index():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part'})
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'})
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
+    if 'files' not in request.files:
+        return jsonify({'error': 'No files part'})
 
-        # Load model
-        model = tf.saved_model.load('./model/saved_model')
+    files = request.files.getlist('files')
+    results = []
 
-        # Read and preprocess image
-        image = read_image(filepath)
+    for file in files:
+        if file.filename == '':
+            results.append({'error': 'No selected file'})
+            continue
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
 
-        # Get predictions
-        preds = model([image])
-        probability = 100 * tf.get_static_value(preds[0])[0]
+            # Load model
+            model = tf.saved_model.load('./model/saved_model')
 
-        return jsonify({'probability': probability, 'filename': filename})
-    else:
-        return jsonify({'error': 'File type not allowed'})
+            # Read and preprocess image
+            image = read_image(filepath)
+
+            # Get predictions
+            preds = model([image])
+            probability = 100 * tf.get_static_value(preds[0])[0]
+
+            results.append({'probability': probability, 'filename': filename})
+        else:
+            results.append({'error': 'File type not allowed'})
+
+    return jsonify(results)
 
 
 if __name__ == '__main__':
