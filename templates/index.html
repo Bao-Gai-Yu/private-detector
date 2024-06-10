@@ -19,12 +19,15 @@
                 <div style="display: flex">
                     <div>
                         <input type="file" id="file" name="file" accept="image/*" multiple>
-                        <label for="file" class="upload-btn">选择图片</label>
+                        <label for="file" id="upload-img-btn" class="upload-btn cool-btn" style="--clr:#00ccff;"><span>选择图片</span></label>
                     </div>
-                    <button type="submit">识别</button>
+                    <div>
+                        <button id="submit-btn" class="cool-btn" type="submit" style="display: none">识别</button>
+                        <label for="submit-btn" class="upload-btn cool-btn" style="--clr:#00ccff;"><span>识别</span></label>
+                    </div>
                 </div>
             </form>
-<!--            <div id="result"></div>-->
+            <!--            <div id="result"></div>-->
         </div>
     </div>
 </div>
