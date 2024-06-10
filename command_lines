@@ -1,0 +1,1 @@
+python .\inference.py --model ./model/saved_model --image_paths .\dataset\Yes_samples\1.jpg .\dataset\Yes_samples\2.jpg
