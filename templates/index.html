@@ -53,6 +53,10 @@
                 uploadedImgTag[index].innerHTML = `<div>Error: ${result.error}</div>`;
             } else {
                 uploadedImgTag[index].innerHTML = `<div>${result.probability.toFixed(2)}%</div>`;
+                if(result.probability >= 60.0)
+                    uploadedImgTag[index].parentElement.style.backgroundColor='#ff0057';
+                else
+                    uploadedImgTag[index].parentElement.style.backgroundColor='#00ff0a';
             }
         });
     }
