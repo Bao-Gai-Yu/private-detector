@@ -49,13 +49,13 @@ def predict():
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
 
-            # Load model
+            # 加载模型
             model = tf.saved_model.load('./model/saved_model')
 
-            # Read and preprocess image
+            # 读入图片
             image = read_image(filepath)
 
-            # Get predictions
+            # 得到模型返回结果
             preds = model([image])
             probability = 100 * tf.get_static_value(preds[0])[0]
 

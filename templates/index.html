@@ -3,41 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Private Detector</title>
+    <title>隐私检测</title>
+    <link rel="stylesheet" href="../static/css/index.css">
 </head>
 <body>
-    <h1>Private Detector</h1>
-    <form id="upload-form" enctype="multipart/form-data">
-        <input type="file" id="file" name="file" accept="image/*" multiple>
-        <button type="submit">Upload</button>
-    </form>
-    <div id="result"></div>
-    <script>
-        document.getElementById('upload-form').onsubmit = async function(event) {
-            event.preventDefault();
-            const formData = new FormData();
-            const fileField = document.querySelector('input[type="file"]');
-            for (const file of fileField.files) {
-                formData.append('files', file);
-            }
-
-            const response = await fetch('http://127.0.0.1:5000/predict', {
-                method: 'POST',
-                body: formData
-            });
-
-            const results = await response.json();
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = '';
-
-            results.forEach(result => {
-                if (result.error) {
-                    resultDiv.innerHTML += `<p>Error: ${result.error}</p>`;
-                } else {
-                    resultDiv.innerHTML += `<p>Probability: ${result.probability.toFixed(2)}% - ${result.filename}</p>`;
-                }
-            });
+<div id="outer-container" class="centered">
+    <div class="container centered">
+        <i id="ring1" style="--clr:#00ff0a;"></i>
+        <i id="ring2" style="--clr:#ff0057;"></i>
+        <i id="ring3" style="--clr:#fffd44;"></i>
+        <div id="main-panel">
+            <p id="panel-title">隐私图片检测</p>
+            <form id="upload-form" enctype="multipart/form-data">
+                <div id="uploaded-imgs"></div>
+                <div style="display: flex">
+                    <div>
+                        <input type="file" id="file" name="file" accept="image/*" multiple>
+                        <label for="file" class="upload-btn">选择图片</label>
+                    </div>
+                    <button type="submit">识别</button>
+                </div>
+            </form>
+<!--            <div id="result"></div>-->
+        </div>
+    </div>
+</div>
+<script>
+    //将上传的图片发送给大模型进行判断
+    document.getElementById('upload-form').onsubmit = async function (event) {
+        event.preventDefault();
+        const formData = new FormData();
+        const fileField = document.querySelector('input[type="file"]');
+        for (const file of fileField.files) {
+            formData.append('files', file);
         }
-    </script>
+
+        const response = await fetch('http://127.0.0.1:5000/predict', {
+            method: 'POST',
+            body: formData
+        });
+
+        const results = await response.json();
+        results.forEach((result, index) => {
+            var uploadedImgTag = document.getElementsByClassName('uploaded-img-tag');
+            if (result.error) {
+                uploadedImgTag[index].innerHTML = `<div>Error: ${result.error}</div>`;
+            } else {
+                uploadedImgTag[index].innerHTML = `<div>${result.probability.toFixed(2)}%</div>`;
+            }
+        });
+    }
+    //将上传的图片显示出来
+    document.getElementById('file').addEventListener('change', function (event) {
+        var uploadedImgsDiv = document.getElementById('uploaded-imgs');
+        uploadedImgsDiv.innerHTML = '';
+
+        var files = event.target.files;
+        for (var i = 0; i < files.length; i++) {
+            var file = files[i];
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var uploadedItem = document.createElement('div')
+                uploadedItem.classList.add('uploaded-item');
+                var img = document.createElement('img');
+                img.classList.add('uploaded-img');
+                img.src = e.target.result;
+                var p = document.createElement('p');
+                p.classList.add('uploaded-img-tag');
+                p.innerHTML = '待检测...';
+                uploadedItem.appendChild(img);
+                uploadedItem.appendChild(p);
+                uploadedImgsDiv.appendChild(uploadedItem);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
 </body>
 </html>
