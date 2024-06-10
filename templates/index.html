@@ -19,11 +19,18 @@
                 <div style="display: flex">
                     <div>
                         <input type="file" id="file" name="file" accept="image/*" multiple>
-                        <label for="file" id="upload-img-btn" class="upload-btn cool-btn" style="--clr:#00ccff;"><span>选择图片</span></label>
+                        <label for="file" id="upload-img-btn" class="cool-btn"
+                               style="--clr:#00ccff;--cll:#f15d28"><span>选择图片</span></label>
+                    </div>
+                    <div id="status">
+                        <span>
+                            识别中...
+                        </span>
                     </div>
                     <div>
-                        <button id="submit-btn" class="cool-btn" type="submit" style="display: none">识别</button>
-                        <label for="submit-btn" class="upload-btn cool-btn" style="--clr:#00ccff;"><span>识别</span></label>
+                        <button id="submit-btn" type="submit" style="display: none">识别</button>
+                        <label for="submit-btn" id="rec-btn" class="cool-btn"
+                               style="--clr:#00ccff;--cll:#f15d28"><span>识别</span></label>
                     </div>
                 </div>
             </form>
@@ -34,6 +41,22 @@
 <script>
     //将上传的图片发送给大模型进行判断
     document.getElementById('upload-form').onsubmit = async function (event) {
+        document.querySelector('#file').disabled = true;
+        var uploadBtn = document.querySelector('#upload-img-btn');
+        uploadBtn.classList.remove('cool-btn');
+        uploadBtn.classList.add('disabled-btn');
+        document.querySelector('#submit-btn').disabled = true;
+        var recBtn = document.querySelector('#rec-btn');
+        recBtn.classList.remove('cool-btn');
+        recBtn.classList.add('disabled-btn');
+        var statusText = document.querySelector('#status');
+        statusText.style.visibility = 'visible';
+
+        var curves = document.getElementsByTagName('i');
+        for (var i = 0; i < curves.length; ++i) {
+            curves[i].classList.add('colorful');
+        }
+
         event.preventDefault();
         const formData = new FormData();
         const fileField = document.querySelector('input[type="file"]');
@@ -53,12 +76,23 @@
                 uploadedImgTag[index].innerHTML = `<div>Error: ${result.error}</div>`;
             } else {
                 uploadedImgTag[index].innerHTML = `<div>${result.probability.toFixed(2)}%</div>`;
-                if(result.probability >= 60.0)
-                    uploadedImgTag[index].parentElement.style.backgroundColor='#ff0057';
+                if (result.probability >= 60.0)
+                    uploadedImgTag[index].parentElement.style.backgroundColor = '#ff0057';
                 else
-                    uploadedImgTag[index].parentElement.style.backgroundColor='#00ff0a';
+                    uploadedImgTag[index].parentElement.style.backgroundColor = '#00ff0a';
             }
         });
+
+        document.querySelector('#file').disabled = false;
+        uploadBtn.classList.add('cool-btn');
+        uploadBtn.classList.remove('disabled-btn');
+        document.querySelector('#submit-btn').disabled = false;
+        recBtn.classList.add('cool-btn');
+        recBtn.classList.remove('disabled-btn');
+        statusText.style.visibility = 'hidden';
+        for (var i = 0; i < curves.length; ++i) {
+            curves[i].classList.remove('colorful');
+        }
     }
     //将上传的图片显示出来
     document.getElementById('file').addEventListener('change', function (event) {
