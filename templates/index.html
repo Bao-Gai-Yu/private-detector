@@ -71,15 +71,21 @@
 
         const results = await response.json();
         results.forEach((result, index) => {
-            var uploadedImgTag = document.getElementsByClassName('uploaded-img-tag');
+
+            var uploadedItem = document.getElementById(result.filename);
+            // var uploadedImgTag = document.getElementsByClassName('uploaded-img-tag');
+            var uploadedImgTag = uploadedItem.getElementsByTagName('p')[0];
+
             if (result.error) {
-                uploadedImgTag[index].innerHTML = `<div>Error: ${result.error}</div>`;
+                uploadedImgTag.innerHTML = `<div>Error: ${result.error}</div>`;
             } else {
-                uploadedImgTag[index].innerHTML = `<div>${result.probability.toFixed(2)}%</div>`;
-                if (result.probability >= 60.0)
-                    uploadedImgTag[index].parentElement.style.backgroundColor = '#ff0057';
+                uploadedImgTag.innerHTML = `<div>${result.probability.toFixed(2)}%</div>`;
+                if (result.probability <= 20.0)
+                    uploadedImgTag.parentElement.style.backgroundColor = '#00ff0a';
+                else if (result.probability <= 60.0)
+                    uploadedImgTag.parentElement.style.backgroundColor = '#fffd44';
                 else
-                    uploadedImgTag[index].parentElement.style.backgroundColor = '#00ff0a';
+                    uploadedImgTag.parentElement.style.backgroundColor = '#ff0057';
             }
         });
 
@@ -94,31 +100,69 @@
             curves[i].classList.remove('colorful');
         }
     }
-    //将上传的图片显示出来
-    document.getElementById('file').addEventListener('change', function (event) {
-        var uploadedImgsDiv = document.getElementById('uploaded-imgs');
-        uploadedImgsDiv.innerHTML = '';
 
-        var files = event.target.files;
-        for (var i = 0; i < files.length; i++) {
-            var file = files[i];
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                var uploadedItem = document.createElement('div')
+
+
+    //将上传的图片显示出来
+    // document.getElementById('file').addEventListener('change', function (event) {
+    //     var uploadedImgsDiv = document.getElementById('uploaded-imgs');
+    //     uploadedImgsDiv.innerHTML = '';
+    //
+    //     var files = event.target.files;
+    //     for (var i = 0; i < files.length; i++) {
+    //         var file = files[i];
+    //         var reader = new FileReader();
+    //         reader.onload = function (e) {
+    //             var uploadedItem = document.createElement('div')
+    //             uploadedItem.classList.add('uploaded-item');
+    //             uploadedItem.id =
+    //             var img = document.createElement('img');
+    //             img.classList.add('uploaded-img');
+    //             img.src = e.target.result;
+    //             var p = document.createElement('p');
+    //             p.classList.add('uploaded-img-tag');
+    //             p.innerHTML = '待检测...';
+    //             uploadedItem.appendChild(img);
+    //             uploadedItem.appendChild(p);
+    //             uploadedImgsDiv.appendChild(uploadedItem);
+    //         };
+    //         reader.readAsDataURL(file);
+    //     }
+    // });
+    document.getElementById('file').addEventListener('change', function (event) {
+    var uploadedImgsDiv = document.getElementById('uploaded-imgs');
+    uploadedImgsDiv.innerHTML = '';
+
+    var files = event.target.files;
+    for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        var reader = new FileReader();
+
+        // 使用闭包将文件对象传递给onload回调函数
+        reader.onload = (function(file) {
+            return function (e) {
+                var uploadedItem = document.createElement('div');
                 uploadedItem.classList.add('uploaded-item');
+                uploadedItem.id = file.name;  // 将id设置为文件名
+
                 var img = document.createElement('img');
                 img.classList.add('uploaded-img');
                 img.src = e.target.result;
+
                 var p = document.createElement('p');
                 p.classList.add('uploaded-img-tag');
                 p.innerHTML = '待检测...';
+
                 uploadedItem.appendChild(img);
                 uploadedItem.appendChild(p);
                 uploadedImgsDiv.appendChild(uploadedItem);
             };
-            reader.readAsDataURL(file);
-        }
-    });
+        })(file);
+
+        reader.readAsDataURL(file);
+    }
+});
+
 </script>
 </body>
 </html>
